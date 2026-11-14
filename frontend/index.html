@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mading Bersama</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="header-left">
+          <h1 class="app-title">Mading Bersama</h1>
+          <p class="app-subtitle">
+            Papan cerita, kabar, dan ide warga sekolah.
+          </p>
+        </div>
+        <div class="header-right" id="auth-panel">
+          <div id="user-info" class="user-info hidden">
+            <span id="user-name" class="user-name"></span>
+            <button type="button" id="btn-logout" class="btn btn-outline">
+              Keluar
+            </button>
+          </div>
+          <div id="guest-info" class="guest-info">
+            <button type="button" id="btn-login-modal" class="btn btn-outline">
+              Masuk
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Cari judul atau isi..."
+            autocomplete="off"
+          />
+          <button type="button" id="btn-search" class="btn btn-outline">
+            Cari
+          </button>
+        </div>
+        <div class="filter-box">
+          <select id="filter-type" class="select-control">
+            <option value="">Jenis: Semua</option>
+            <option value="photo">Foto</option>
+            <option value="announcement">Pengumuman</option>
+            <option value="note">Catatan / Ide</option>
+          </select>
+          <select id="filter-mine" class="select-control">
+            <option value="0">Semua Tempelan</option>
+            <option value="1">Tempelan Saya</option>
+          </select>
+        </div>
+        <div class="action-buttons">
+          <button type="button" id="btn-refresh" class="btn btn-outline">
+            Perbarui Mading
+          </button>
+          <button type="button" id="btn-open-create" class="btn btn-primary">
+            + Tambah Tempelan
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-bar">
+        <span id="stat-total">0 tempelan ditampilkan</span>
+        <span id="stat-mine">0 tempelan milik saya</span>
+      </div>
+
+      <main class="board-frame">
+        <div class="corkboard" id="corkboard">
+          <div id="board-loading" class="board-empty hidden">
+            Memuat tempelan...
+          </div>
+          <div id="board-empty" class="board-empty hidden">
+            Belum ada tempelan yang dipasang di mading.
+          </div>
+          <div class="cards-grid" id="cards-grid"></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="login-modal" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Masuk ke Akun</h3>
+          <button type="button" class="btn-close" data-close="login-modal">
+            &times;
+          </button>
+        </div>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input
+              type="email"
+              id="login-email"
+              required
+              placeholder="nama@sekolah.sch.id"
+            />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input
+              type="password"
+              id="login-password"
+              required
+              placeholder="••••••••"
+            />
+          </div>
+          <div id="login-error" class="form-error hidden"></div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-outline"
+              data-close="login-modal"
+            >
+              Batal
+            </button>
+            <button type="submit" class="btn btn-primary">Masuk</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="post-modal" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="post-modal-title">Tambah Tempelan</h3>
+          <button type="button" class="btn-close" data-close="post-modal">
+            &times;
+          </button>
+        </div>
+        <form id="post-form">
+          <input type="hidden" id="post-id" />
+          <div class="form-group" id="group-type">
+            <label for="post-type">Jenis Tempelan</label>
+            <select id="post-type" class="select-control" required>
+              <option value="photo">Foto</option>
+              <option value="announcement">Pengumuman</option>
+              <option value="note">Catatan / Ide</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="post-title">Judul (maks. 80 karakter)</label>
+            <input
+              type="text"
+              id="post-title"
+              maxlength="80"
+              required
+              placeholder="Contoh: Jelajah alam"
+            />
+          </div>
+          <div
+            class="form-group conditional-field field-photo"
+            id="field-image"
+          >
+            <label for="post-image-file">Pilih Berkas Foto (Lokal)</label>
+            <input
+              type="file"
+              id="post-image-file"
+              accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+            />
+            <div
+              id="image-preview-container"
+              class="image-preview-container hidden"
+            >
+              <img id="image-preview" src="" alt="Pratinjau Foto" />
+              <span id="image-preview-note" class="image-preview-note"></span>
+            </div>
+          </div>
+          <div
+            class="form-group conditional-field field-photo"
+            id="field-image-caption"
+          >
+            <label for="post-caption">Keterangan Gambar (Opsional)</label>
+            <input
+              type="text"
+              id="post-caption"
+              maxlength="255"
+              placeholder="Keterangan singkat foto"
+            />
+          </div>
+          <div
+            class="form-group conditional-field field-announcement field-note"
+            id="field-content"
+          >
+            <label for="post-content">Isi Tempelan (maks. 500 karakter)</label>
+            <textarea
+              id="post-content"
+              rows="4"
+              maxlength="500"
+              placeholder="Tuliskan isi atau pesan..."
+            ></textarea>
+          </div>
+          <div
+            class="form-group conditional-field field-announcement"
+            id="field-event-date"
+          >
+            <label for="post-event-date">Tanggal Kegiatan (Opsional)</label>
+            <input type="date" id="post-event-date" />
+          </div>
+          <div class="form-group conditional-field field-note" id="field-color">
+            <label>Warna Kertas</label>
+            <div class="color-options">
+              <label class="color-radio yellow">
+                <input type="radio" name="post-color" value="yellow" checked />
+                <span>Kuning</span>
+              </label>
+              <label class="color-radio pink">
+                <input type="radio" name="post-color" value="pink" />
+                <span>Merah Muda</span>
+              </label>
+              <label class="color-radio blue">
+                <input type="radio" name="post-color" value="blue" />
+                <span>Biru</span>
+              </label>
+            </div>
+          </div>
+          <div id="post-error" class="form-error hidden"></div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-outline"
+              data-close="post-modal"
+            >
+              Batal
+            </button>
+            <button type="submit" id="btn-save-post" class="btn btn-primary">
+              Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="detail-modal" class="modal-backdrop hidden">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <h3 id="detail-title">Detail Tempelan</h3>
+          <button type="button" class="btn-close" data-close="detail-modal">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" id="detail-body"></div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-outline"
+            data-close="detail-modal"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
